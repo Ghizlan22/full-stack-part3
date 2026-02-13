@@ -34,12 +34,17 @@ app.get('/api/notes', (request, response) => {
 
 app.get('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
+  
+  if (isNaN(id)) {
+    return response.status(400).json({ error: 'malformatted id' })
+  }
+  
   const note = notes.find(note => note.id === id)
   
   if (note) {
     response.json(note)
   } else {
-    response.status(404).end()
+    response.status(404).json({ error: 'note not found' })
   }
 })
 
@@ -53,9 +58,7 @@ app.post('/api/notes', (request, response) => {
   const body = request.body
 
   if (!body.content) {
-    return response.status(400).json({ 
-      error: 'content missing' 
-    })
+    return response.status(400).json({ error: 'content missing' })
   }
 
   const note = {
@@ -69,7 +72,6 @@ app.post('/api/notes', (request, response) => {
   response.status(201).json(note)
 })
 
-// EXERCICE 3.2 : Middleware pour les routes inconnues
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
