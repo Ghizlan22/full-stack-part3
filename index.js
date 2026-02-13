@@ -61,8 +61,11 @@ app.post('/api/notes', (request, response) => {
     return response.status(400).json({ error: 'content missing' })
   }
 
+  const ids = notes.map(note => note.id)
+  const maxId = Math.max(...ids)
+
   const note = {
-    id: Math.floor(Math.random() * 1000000),
+    id: maxId + 1,
     content: body.content,
     date: new Date(),
     important: body.important || false,
