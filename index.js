@@ -1,7 +1,6 @@
 const express = require('express')
 const app = express()
 
-// Middleware pour parser le JSON (important pour les requêtes POST)
 app.use(express.json())
 
 let notes = [
@@ -25,17 +24,14 @@ let notes = [
   }
 ]
 
-// Route pour la page d'accueil
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
-// Route pour obtenir toutes les notes
 app.get('/api/notes', (request, response) => {
   response.json(notes)
 })
 
-// Route pour obtenir une note spécifique par ID (Exercice 3.1)
 app.get('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
   const note = notes.find(note => note.id === id)
@@ -47,14 +43,12 @@ app.get('/api/notes/:id', (request, response) => {
   }
 })
 
-// Route pour supprimer une note (Exercice 3.1)
 app.delete('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
   notes = notes.filter(note => note.id !== id)
   response.status(204).end()
 })
 
-// Route pour ajouter une nouvelle note (Exercice 3.1)
 app.post('/api/notes', (request, response) => {
   const body = request.body
 
@@ -65,7 +59,7 @@ app.post('/api/notes', (request, response) => {
   }
 
   const note = {
-    id: Math.floor(Math.random() * 1000000), // ID temporaire
+    id: Math.floor(Math.random() * 1000000),
     content: body.content,
     date: new Date(),
     important: body.important || false,
@@ -74,6 +68,13 @@ app.post('/api/notes', (request, response) => {
   notes = notes.concat(note)
   response.status(201).json(note)
 })
+
+// EXERCICE 3.2 : Middleware pour les routes inconnues
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
 
 const PORT = 3001
 app.listen(PORT, () => {
