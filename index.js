@@ -50,6 +50,17 @@ app.get('/api/notes/:id', (request, response) => {
 
 app.delete('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
+  
+  if (isNaN(id)) {
+    return response.status(400).json({ error: 'malformatted id' })
+  }
+  
+  const noteExists = notes.some(note => note.id === id)
+  
+  if (!noteExists) {
+    return response.status(404).json({ error: 'note not found' })
+  }
+  
   notes = notes.filter(note => note.id !== id)
   response.status(204).end()
 })
@@ -61,12 +72,21 @@ app.post('/api/notes', (request, response) => {
     return response.status(400).json({ error: 'content missing' })
   }
 
-  if (body.important && typeof body.important !== 'boolean') {
+  if (body.content.length < 3) {
+    return response.status(400).json({ error: 'content must be at least 3 characters long' })
+  }
+
+  if (body.important !== undefined && typeof body.important !== 'boolean') {
     return response.status(400).json({ error: 'important must be a boolean' })
   }
 
+  const existingNote = notes.find(note => note.content === body.content)
+  if (existingNote) {
+    return response.status(400).json({ error: 'note with same content already exists' })
+  }
+
   const ids = notes.map(note => note.id)
-  const maxId = Math.max(...ids)
+  const maxId = notes.length > 0 ? Math.max(...ids) : 0
 
   const note = {
     id: maxId + 1,
@@ -80,7 +100,7 @@ app.post('/api/notes', (request, response) => {
 })
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+  response.status(404).json({ error: 'unknown endpoint' })
 }
 
 app.use(unknownEndpoint)
