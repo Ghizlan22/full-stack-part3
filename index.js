@@ -61,6 +61,10 @@ app.post('/api/notes', (request, response) => {
     return response.status(400).json({ error: 'content missing' })
   }
 
+  if (body.important && typeof body.important !== 'boolean') {
+    return response.status(400).json({ error: 'important must be a boolean' })
+  }
+
   const ids = notes.map(note => note.id)
   const maxId = Math.max(...ids)
 
